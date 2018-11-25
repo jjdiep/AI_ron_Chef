@@ -14,6 +14,7 @@ from skimage.measure import regionprops
 import eta.core.image as etai
 from collections import deque
 
+# useful reference http://www.cs.cornell.edu/~ylongqi/paper/YangYumme.pdf
 # tensorflow library example, 
 def train():
 # run on training set
