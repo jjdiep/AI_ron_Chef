@@ -85,7 +85,7 @@ def word_finder():
         item = wnid_list[line].split(' ')
         word.append(item[0])
         wnid.append(item[1][:-1])
-
+    fh.close()
     return word, wnid
 
 def url_extractor(wnid):
@@ -164,20 +164,23 @@ def img_gen(directory, n_of_training_images):
                 None
         progress += 1
 
+# def bbox_finder(wnid):
+#     path = wnid
+
 n_img = 100 # choose the number of training images to use, make sure not to pick more images than there are urls!
 word, wnid = word_finder()
 
-for num_words in range(len(word)):
-    print(str(num_words)+' out of '+str(len(word)))
-    directory = dir_maker(word[num_words])
-    img_split_urls = url_extractor(wnid[num_words])
-    img_gen(directory, n_img)
+# for num_words in range(len(word)):
+#     print(str(num_words)+' out of '+str(len(word)))
+#     directory = dir_maker(word[num_words])
+#     img_split_urls = url_extractor(wnid[num_words])
+#     img_gen(directory, n_img)
 
 # demo code, should run on cheese class
 
-# directory = dir_maker(word[7])
-# img_split_urls = url_extractor(wnid[7])
-# img_gen(directory, n_img)
+directory = dir_maker(word[0])
+img_split_urls = url_extractor(wnid[0])
+img_gen(directory, n_img)
 
 print('Done!')
 # Change this!
