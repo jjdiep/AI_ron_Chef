@@ -68,7 +68,7 @@ for recipe in top_5:
 # for each recipe
 for i in range(len(recipe_name)):
 	# open a file called recipe_x
-	f = open("recipe_"+str(i+1), 'w')
+	f = open("recipe/recipe_"+str(i+1), 'w')
 	# write recipe name
 	f.write(recipe_name[i]+'\n')
 	f.write('\n')
