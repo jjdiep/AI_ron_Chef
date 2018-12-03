@@ -1,3 +1,5 @@
+# recipe_crawler.py
+# version_2.0
 from bs4 import BeautifulSoup
 from collections import defaultdict
 import requests
