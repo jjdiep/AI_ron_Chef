@@ -41,22 +41,6 @@ import math
 import pdb
 
 
-
-
-
-num_processes = 3
-pool = mp.Pool(processes=num_processes)
-
-class_to_ix = {}
-ix_to_class = {}
-with open('food/classes.txt', 'r') as txt:
-    classes = [l.strip() for l in txt.readlines()]
-    class_to_ix = dict(zip(classes, range(len(classes))))
-    ix_to_class = dict(zip(range(len(classes)), classes))
-    class_to_ix = {v: k for k, v in ix_to_class.items()}
-
-pdb.set_trace()
-
 def load_images(root, min_side=299):
     all_imgs = []
     all_classes = []
@@ -95,65 +79,7 @@ def load_images(root, min_side=299):
     print(resize_count, 'images resized')
     print(invalid_count, 'images skipped')
     return np.array(all_imgs), np.array(all_classes)
-    
-X_image, y_label = load_images('food/image', min_side=299)
-X_train = X_image
-y_train = y_label
-X_test = X_image
-y_test = y_label
 
-#from keras.utils.np_utils import to_categorical
-
-n_classes = len(classes)
-y_train_cat = to_categorical(y_train, num_classes=n_classes)
-y_test_cat = to_categorical(y_test, num_classes=n_classes)
-
-pdb.set_trace()
-
-
-# this is the augmentation configuration we will use for training
-train_datagen = T.ImageDataGenerator(
-    featurewise_center=False,  # set input mean to 0 over the dataset
-    samplewise_center=False,  # set each sample mean to 0
-    featurewise_std_normalization=False,  # divide inputs by std of the dataset
-    samplewise_std_normalization=False,  # divide each input by its std
-    zca_whitening=False,  # apply ZCA whitening
-    rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
-    width_shift_range=0.2,  # randomly shift images horizontally (fraction of total width)
-    height_shift_range=0.2,  # randomly shift images vertically (fraction of total height)
-    horizontal_flip=True,  # randomly flip images
-    vertical_flip=False, # randomly flip images
-    zoom_range=[.8, 1],
-    channel_shift_range=30,
-    fill_mode='reflect')
-train_datagen.config['random_crop_size'] = (299, 299)
-train_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
-train_generator = train_datagen.flow(X_train, y_train_cat, batch_size=64, seed=11, pool=pool)
-
-test_datagen = T.ImageDataGenerator()
-test_datagen.config['random_crop_size'] = (299, 299)
-test_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
-test_generator = test_datagen.flow(X_test, y_test_cat, batch_size=64, seed=11, pool=pool)
-
-pdb.set_trace()
-
-
-K.clear_session()
-
-base_model = InceptionV3(weights='imagenet', include_top=False, input_tensor=Input(shape=(299, 299, 3)))
-x = base_model.output
-x = AveragePooling2D(pool_size=(8, 8))(x)
-x = Dropout(.4)(x)
-x = Flatten()(x)
-predictions = Dense(n_classes, kernel_initializer='glorot_uniform', kernel_regularizer=l2(.0005), activation='softmax')(x)
-
-model = Model(inputs=base_model.input, outputs=predictions)
-
-opt = SGD(lr=.01, momentum=.9)
-model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
-
-checkpointer = ModelCheckpoint(filepath='model4.{epoch:02d}-{val_loss:.2f}.hdf5', verbose=1, save_best_only=True)
-csv_logger = CSVLogger('model4.log')
 
 def schedule(epoch):
     if epoch < 15:
@@ -162,22 +88,6 @@ def schedule(epoch):
         return .002
     else:
         return .0004
-
-
-lr_scheduler = LearningRateScheduler(schedule)
-
-pdb.set_trace()
-
-model.fit_generator(train_generator,
-                    validation_data=test_generator,
-                    validation_steps= X_test.shape[0],
-                    steps_per_epoch=X_train.shape[0],
-                    epochs=10,
-                    verbose=2,
-                    callbacks=[lr_scheduler, csv_logger, checkpointer])
-
-model = load_model(filepath='./model4b.10-0.68.hdf5')
-
 
 
 def center_crop(x, center_crop_size):
@@ -226,8 +136,96 @@ def predict_10_crop(img, ix, top_n, plot, preprocess, debug):
         print('True Label:', y_test[ix])
     return preds, top_n_preds
 
+if __name__ == "__main__":
+    num_processes = 3
+    pool = mp.Pool(processes=num_processes)
 
-ix = 10
-predict_10_crop(img = X_test[ix], ix = ix, top_n=5, plot=True, preprocess=True, debug=True)
+    class_to_ix = {}
+    ix_to_class = {}
+    with open('food/classes.txt', 'r') as txt:
+        classes = [l.strip() for l in txt.readlines()]
+        class_to_ix = dict(zip(classes, range(len(classes))))
+        ix_to_class = dict(zip(range(len(classes)), classes))
+        class_to_ix = {v: k for k, v in ix_to_class.items()}
+
+    pdb.set_trace()
+
+    X_image, y_label = load_images('food/image', min_side=299)
+    X_train = X_image
+    y_train = y_label
+    X_test = X_image
+    y_test = y_label
+
+    # from keras.utils.np_utils import to_categorical
+
+    n_classes = len(classes)
+    y_train_cat = to_categorical(y_train, num_classes=n_classes)
+    y_test_cat = to_categorical(y_test, num_classes=n_classes)
+
+    pdb.set_trace()
+
+    # this is the augmentation configuration we will use for training
+    train_datagen = T.ImageDataGenerator(
+        featurewise_center=False,  # set input mean to 0 over the dataset
+        samplewise_center=False,  # set each sample mean to 0
+        featurewise_std_normalization=False,  # divide inputs by std of the dataset
+        samplewise_std_normalization=False,  # divide each input by its std
+        zca_whitening=False,  # apply ZCA whitening
+        rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
+        width_shift_range=0.2,  # randomly shift images horizontally (fraction of total width)
+        height_shift_range=0.2,  # randomly shift images vertically (fraction of total height)
+        horizontal_flip=True,  # randomly flip images
+        vertical_flip=False,  # randomly flip images
+        zoom_range=[.8, 1],
+        channel_shift_range=30,
+        fill_mode='reflect')
+    train_datagen.config['random_crop_size'] = (299, 299)
+    train_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
+    train_generator = train_datagen.flow(X_train, y_train_cat, batch_size=64, seed=11, pool=pool)
+
+    test_datagen = T.ImageDataGenerator()
+    test_datagen.config['random_crop_size'] = (299, 299)
+    test_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
+    test_generator = test_datagen.flow(X_test, y_test_cat, batch_size=64, seed=11, pool=pool)
+
+    pdb.set_trace()
+
+    K.clear_session()
+
+    base_model = InceptionV3(weights='imagenet', include_top=False, input_tensor=Input(shape=(299, 299, 3)))
+    x = base_model.output
+    x = AveragePooling2D(pool_size=(8, 8))(x)
+    x = Dropout(.4)(x)
+    x = Flatten()(x)
+    predictions = Dense(n_classes, kernel_initializer='glorot_uniform', kernel_regularizer=l2(.0005),
+                        activation='softmax')(x)
+
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    opt = SGD(lr=.01, momentum=.9)
+    model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+
+    checkpointer = ModelCheckpoint(filepath='model4.{epoch:02d}-{val_loss:.2f}.hdf5', verbose=1, save_best_only=True)
+    csv_logger = CSVLogger('model4.log')
+
+    lr_scheduler = LearningRateScheduler(schedule)
+
+    pdb.set_trace()
+
+    model.fit_generator(train_generator,
+                        validation_data=test_generator,
+                        validation_steps=X_test.shape[0],
+                        steps_per_epoch=X_train.shape[0],
+                        epochs=10,
+                        verbose=2,
+                        callbacks=[lr_scheduler, csv_logger, checkpointer])
+
+    model = load_model(filepath='./model4.10-0.02.hdf5')
+
+
+
+
+    ix = 10
+    predict_10_crop(img = X_test[ix], ix = ix, top_n=5, plot=True, preprocess=True, debug=True)
 
 

@@ -496,7 +496,7 @@ class ImageDataGenerator(object):
                             'column) or "th" (channel before row and column). '
                             'Received arg: ', dim_ordering)
 
-        self.__sync_seed = self.config['seed'] or np.random.randint(0, 4294967295)
+        self.__sync_seed = self.config['seed'] or np.random.randint(0, 4294967295, dtype='int64')
 
         self.default_pipeline = []
         self.default_pipeline.append(random_transform)
@@ -730,7 +730,7 @@ class NumpyArrayIterator(Iterator):
         batch_x = np.array(result)
 
         for i, rng in enumerate(self.rngs):
-            new_seed = rng.randint(0, 4294967295)
+            new_seed = rng.randint(0, 4294967295, dtype='int64')
             self.rngs[i] = np.random.RandomState(new_seed)
 
         # for i, j in enumerate(index_array):
