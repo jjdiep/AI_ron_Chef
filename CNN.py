@@ -96,7 +96,7 @@ def center_crop(x, center_crop_size):
     return x[centerw-halfw:centerw+halfw+1,centerh-halfh:centerh+halfh+1, :]
 
 
-def predict_10_crop(img, ix, top_n, plot, preprocess, debug):
+def predict_10_crop(img, ix, top_n, plot = False, preprocess = True, debug = False):
     flipped_X = np.fliplr(img)
     crops = [
         img[:299,:299, :], # Upper Left
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     class_to_ix = {}
     ix_to_class = {}
-    with open('food/classes.txt', 'r') as txt:
+    with open('data/classes.txt', 'r') as txt:
         classes = [l.strip() for l in txt.readlines()]
         class_to_ix = dict(zip(classes, range(len(classes))))
         ix_to_class = dict(zip(range(len(classes)), classes))
@@ -150,11 +150,9 @@ if __name__ == "__main__":
 
     pdb.set_trace()
 
-    X_image, y_label = load_images('food/image', min_side=299)
-    X_train = X_image
-    y_train = y_label
-    X_test = X_image
-    y_test = y_label
+    X_train, y_train = load_images('data/trainimage', min_side=299)
+    X_test, y_test = load_images('data/testimage', min_side=299)
+    pdb.set_trace()
 
     # from keras.utils.np_utils import to_categorical
 
@@ -225,7 +223,21 @@ if __name__ == "__main__":
 
 
 
-    ix = 10
-    predict_10_crop(img = X_test[ix], ix = ix, top_n=5, plot=True, preprocess=True, debug=True)
+    #ix = 10
+    #predict_10_crop(img = X_test[ix], ix = ix, top_n=5, plot=True, preprocess=True, debug=True)
+    preds_10_crop = {}
+    for ix in range(len(X_test)):
+        preds_10_crop[ix] = predict_10_crop(X_test[ix], ix)
+
+    preds_top_1 = {k: collections.Counter(v[0]).most_common(1) for k, v in preds_10_crop.items()}
+
+    #time
+    right_counter = 0
+    for i in range(len(y_test)):
+        guess, actual = preds_top_1[i][0][0], y_test[i]
+        if guess == actual:
+            right_counter += 1
+        
+    print('Top-1 Accuracy, 10-Crop: {0:.2f}%'.format(right_counter / len(y_test) * 100))
 
 
