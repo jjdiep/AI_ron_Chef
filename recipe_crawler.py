@@ -5,7 +5,7 @@ from collections import defaultdict
 import requests
 
 # input ingredient
-ingredient = ['tomato', 'egg', 'steak']
+ingredient = ['carrot', 'corn', 'lettuce', 'potato']
 # initialize query prefix
 query = "https://www.allrecipes.com/search/results/?wt="
 
@@ -75,9 +75,21 @@ for i in range(len(recipe_name)):
 	f.write(recipe_name[i]+'\n')
 	f.write('\n')
 	# write all ingredients
-	f.write('Ingredients:' +'\n')
+	additional = []
+	f.write('Ingredients You May Have:' +'\n')
 	for j in range(len(recipe_ingredient[recipe_name[i]])):
-		f.write(str(recipe_ingredient[recipe_name[i]][j])+'\n')
+		flag = 0
+		for item in ingredient:
+			if item in str(recipe_ingredient[recipe_name[i]][j]):
+				f.write(str(recipe_ingredient[recipe_name[i]][j])+'\n')
+				flag = 1
+				break
+		if flag == 0:
+			additional.append(str(recipe_ingredient[recipe_name[i]][j])+'\n')
+	f.write('\n')
+	f.write('Ingredients You May Need:' +'\n')
+	for a in additional:
+		f.write(a)
 	f.write('\n')
 	# write full directions
 	f.write('Directions:' +'\n')
