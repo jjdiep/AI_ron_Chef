@@ -218,7 +218,7 @@ if __name__ == "__main__":
                         verbose=2,
                         callbacks=[lr_scheduler, csv_logger, checkpointer])
 
-    model = load_model(filepath='./model4.10-0.02.hdf5')
+    model = load_model(filepath='./model4.08-1.49.hdf5')
 
 
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     #predict_10_crop(img = X_test[ix], ix = ix, top_n=5, plot=True, preprocess=True, debug=True)
     preds_10_crop = {}
     for ix in range(len(X_test)):
-        preds_10_crop[ix] = predict_10_crop(X_test[ix], ix)
+        preds_10_crop[ix] = predict_10_crop(X_test[ix], ix, top_n = 5)
 
     preds_top_1 = {k: collections.Counter(v[0]).most_common(1) for k, v in preds_10_crop.items()}
 
