@@ -142,28 +142,28 @@ if __name__ == "__main__":
 
     class_to_ix = {}
     ix_to_class = {}
-    with open('data/classes.txt', 'r') as txt:
+    '''with open('data/classes.txt', 'r') as txt:
         classes = [l.strip() for l in txt.readlines()]
         class_to_ix = dict(zip(classes, range(len(classes))))
         ix_to_class = dict(zip(range(len(classes)), classes))
         class_to_ix = {v: k for k, v in ix_to_class.items()}
 
-    pdb.set_trace()
+    pdb.set_trace()'''
 
-    X_train, y_train = load_images('data/trainimage', min_side=299)
-    X_test, y_test = load_images('data/testimage', min_side=299)
+    '''X_train, y_train = load_images('data/trainimage', min_side=299)'''
+    X_test, y_test = load_images('segmentedimage/testimage', min_side=299)
     pdb.set_trace()
 
     # from keras.utils.np_utils import to_categorical
 
     n_classes = len(classes)
-    y_train_cat = to_categorical(y_train, num_classes=n_classes)
-    y_test_cat = to_categorical(y_test, num_classes=n_classes)
+    '''y_train_cat = to_categorical(y_train, num_classes=n_classes)
+    y_test_cat = to_categorical(y_test, num_classes=n_classes)'''
 
     pdb.set_trace()
 
     # this is the augmentation configuration we will use for training
-    train_datagen = T.ImageDataGenerator(
+    '''train_datagen = T.ImageDataGenerator(
         featurewise_center=False,  # set input mean to 0 over the dataset
         samplewise_center=False,  # set each sample mean to 0
         featurewise_std_normalization=False,  # divide inputs by std of the dataset
@@ -179,16 +179,16 @@ if __name__ == "__main__":
         fill_mode='reflect')
     train_datagen.config['random_crop_size'] = (299, 299)
     train_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
-    train_generator = train_datagen.flow(X_train, y_train_cat, batch_size=64, seed=11, pool=pool)
+    train_generator = train_datagen.flow(X_train, y_train_cat, batch_size=16, seed=11, pool=pool)
 
     test_datagen = T.ImageDataGenerator()
     test_datagen.config['random_crop_size'] = (299, 299)
     test_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
-    test_generator = test_datagen.flow(X_test, y_test_cat, batch_size=64, seed=11, pool=pool)
+    test_generator = test_datagen.flow(X_test, y_test_cat, batch_size=16, seed=11, pool=pool)'''
 
     pdb.set_trace()
 
-    K.clear_session()
+    '''K.clear_session()
 
     base_model = InceptionV3(weights='imagenet', include_top=False, input_tensor=Input(shape=(299, 299, 3)))
     x = base_model.output
@@ -214,11 +214,11 @@ if __name__ == "__main__":
                         validation_data=test_generator,
                         validation_steps=X_test.shape[0],
                         steps_per_epoch=X_train.shape[0],
-                        epochs=10,
+                        epochs=20,
                         verbose=2,
-                        callbacks=[lr_scheduler, csv_logger, checkpointer])
+                        callbacks=[lr_scheduler, csv_logger, checkpointer])'''
 
-    model = load_model(filepath='./model4.10-0.02.hdf5')
+    model = load_model(filepath='./model4.08-1.49.hdf5')
 
 
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     #predict_10_crop(img = X_test[ix], ix = ix, top_n=5, plot=True, preprocess=True, debug=True)
     preds_10_crop = {}
     for ix in range(len(X_test)):
-        preds_10_crop[ix] = predict_10_crop(X_test[ix], ix)
+        preds_10_crop[ix] = predict_10_crop(X_test[ix], ix, top_n = 5)
 
     preds_top_1 = {k: collections.Counter(v[0]).most_common(1) for k, v in preds_10_crop.items()}
 
@@ -235,9 +235,10 @@ if __name__ == "__main__":
     right_counter = 0
     for i in range(len(y_test)):
         guess, actual = preds_top_1[i][0][0], y_test[i]
+        print(guess)
         if guess == actual:
             right_counter += 1
         
-    print('Top-1 Accuracy, 10-Crop: {0:.2f}%'.format(right_counter / len(y_test) * 100))
+    #print('Top-1 Accuracy, 10-Crop: {0:.2f}%'.format(right_counter / len(y_test) * 100))
 
 
