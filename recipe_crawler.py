@@ -5,11 +5,7 @@ from collections import defaultdict
 import requests
 
 # input ingredient
-<<<<<<< HEAD
-ingredient = ['cheese', 'egg', 'garlic','lettuce','potato']
-=======
-ingredient = ['carrot', 'corn', 'lettuce', 'potato']
->>>>>>> 5de84e1c77b2cdebac286313e55e54a6b636decc
+ingredient = ['pepper', 'tomato', 'cucumber']
 # initialize query prefix
 query = "https://www.allrecipes.com/search/results/?wt="
 
