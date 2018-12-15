@@ -4,8 +4,16 @@ from bs4 import BeautifulSoup
 from collections import defaultdict
 import requests
 
-# input ingredient
-ingredient = ['pepper', 'tomato', 'cucumber']
+ingredient = []
+with open("food_ID.txt", encoding='utf-8') as f1:
+	for line in f1:
+		line = line.split()
+		if line:
+			for item in line:
+				if "_" in item:
+					item = item.replace("_", " ").split()[1]
+				ingredient.append(item)
+
 # initialize query prefix
 query = "https://www.allrecipes.com/search/results/?wt="
 
