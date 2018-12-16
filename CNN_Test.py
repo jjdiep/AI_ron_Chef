@@ -136,6 +136,7 @@ def predict_10_crop(img, ix, top_n, plot = False, preprocess = True, debug = Fal
     return preds, top_n_preds
 
 if __name__ == "__main__":
+    # need to pip install keras, tensorflow, h5py
     num_processes = 3
     pool = mp.Pool(processes=num_processes)
 
@@ -147,74 +148,6 @@ if __name__ == "__main__":
         ix_to_class = dict(zip(range(len(classes)), classes))
         class_to_ix = {v: k for k, v in ix_to_class.items()}
 
-    # X_train, y_train = load_images('data/trainimage', min_side=299)
-    # X_test, y_test = load_images('data/testimage', min_side=299)
-    '''
-    n_classes = len(classes)  
-    y_test_cat = to_categorical(y_test, num_classes=n_classes)
-    test_datagen = T.ImageDataGenerator()
-    test_datagen.config['random_crop_size'] = (299, 299)
-    test_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
-    test_generator = test_datagen.flow(X_test, y_test_cat, batch_size=64, seed=11, pool=pool)
-    '''
-    # from keras.utils.np_utils import to_categorical
-    '''
-    y_train_cat = to_categorical(y_train, num_classes=n_classes)
-
-
-    # this is the augmentation configuration we will use for training
-    train_datagen = T.ImageDataGenerator(
-        featurewise_center=False,  # set input mean to 0 over the dataset
-        samplewise_center=False,  # set each sample mean to 0
-        featurewise_std_normalization=False,  # divide inputs by std of the dataset
-        samplewise_std_normalization=False,  # divide each input by its std
-        zca_whitening=False,  # apply ZCA whitening
-        rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
-        width_shift_range=0.2,  # randomly shift images horizontally (fraction of total width)
-        height_shift_range=0.2,  # randomly shift images vertically (fraction of total height)
-        horizontal_flip=True,  # randomly flip images
-        vertical_flip=False,  # randomly flip images
-        zoom_range=[.8, 1],
-        channel_shift_range=30,
-        fill_mode='reflect')
-    train_datagen.config['random_crop_size'] = (299, 299)
-    train_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
-    train_generator = train_datagen.flow(X_train, y_train_cat, batch_size=64, seed=11, pool=pool)
-
-    test_datagen = T.ImageDataGenerator()
-    test_datagen.config['random_crop_size'] = (299, 299)
-    test_datagen.set_pipeline([T.random_transform, T.random_crop, T.preprocess_input])
-    test_generator = test_datagen.flow(X_test, y_test_cat, batch_size=64, seed=11, pool=pool)
-
-    K.clear_session()
-
-    base_model = InceptionV3(weights='imagenet', include_top=False, input_tensor=Input(shape=(299, 299, 3)))
-    x = base_model.output
-    x = AveragePooling2D(pool_size=(8, 8))(x)
-    x = Dropout(.4)(x)
-    x = Flatten()(x)
-    predictions = Dense(n_classes, kernel_initializer='glorot_uniform', kernel_regularizer=l2(.0005),
-                        activation='softmax')(x)
-
-    model = Model(inputs=base_model.input, outputs=predictions)
-
-    opt = SGD(lr=.01, momentum=.9)
-    model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
-
-    checkpointer = ModelCheckpoint(filepath='model4.{epoch:02d}-{val_loss:.2f}.hdf5', verbose=1, save_best_only=True)
-    csv_logger = CSVLogger('model4.log')
-
-    lr_scheduler = LearningRateScheduler(schedule)
-
-
-    model.fit_generator(train_generator,
-                        validation_data=test_generator,
-                        validation_steps=X_test.shape[0],
-                        steps_per_epoch=X_train.shape[0],
-                        epochs=10,
-                        verbose=2,
-                        callbacks=[lr_scheduler, csv_logger, checkpointer])
-    '''
     model = load_model(filepath='./model_4.10-1.03_fullimg.hdf5')
     X_test, y_test = load_images('data/new_testimage', min_side=299)
 
@@ -234,11 +167,8 @@ if __name__ == "__main__":
         
         fh1.write(ix_to_class[guess]+' ')
 
-        pdb.set_trace()
         if guess == actual:
             right_counter += 1
     fh1.close()
     # print('Top-1 Accuracy, 10-Crop: {0:.2f}%'.format(right_counter / len(y_test) * 100))
 
-
-# need to pip install keras, tensorflow, h5py

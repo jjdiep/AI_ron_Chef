@@ -138,13 +138,13 @@ def dir_maker(word):
 
     return final_directory
 
-def img_gen(directory, n_of_training_images):
+def img_gen(directory, n_of_training_images, img_split_urls):
     print('Creating Images in', directory)
     real_progress = 0
     progress = 0
     valid1 = 'http://farm'
     valid2 = 'http://static'
-
+    pdb.set_trace()
     while real_progress < n_of_training_images:#store all the images on a directory
         # Print out progress whenever progress is a multiple of 20 so we can follow the
         # (relatively slow) progress
@@ -167,75 +167,27 @@ def img_gen(directory, n_of_training_images):
 # def bbox_finder(wnid):
 #     path = wnid
 
-n_img = 100 # choose the number of training images to use, make sure not to pick more images than there are urls!
-word, wnid = word_finder()
+def main():
 
-# for num_words in range(len(word)):
-#     print(str(num_words)+' out of '+str(len(word)))
-#     directory = dir_maker(word[num_words])
-#     img_split_urls = url_extractor(wnid[num_words])
-#     img_gen(directory, n_img)
+    n_img = 100 # choose the number of training images to use, make sure not to pick more images than there are urls!
+    word, wnid = word_finder()
 
-# demo code, should run on cheese class
+    for num_words in range(len(word)):
+        print(str(num_words)+' out of '+str(len(word)))
+        pdb.set_trace()
+        directory = dir_maker(word[num_words])
+        img_split_urls = url_extractor(wnid[num_words])
+        img_gen(directory, n_img, img_split_urls)
 
-directory = dir_maker(word[0])
-img_split_urls = url_extractor(wnid[0])
-img_gen(directory, n_img)
+    # demo code, should run on apple class
 
-print('Done!')
-# Change this!
+    # directory = dir_maker(word[0])
+    # img_split_urls = url_extractor(wnid[0])
+    # img_gen(directory, n_img)
+
+    print('Done!')
 
 
-# need to write code to get rid of images that are not available anymore on flickr
 
-'''
-#do the same for bikes:
-for progress in range(n_of_training_images):#store all the images on a directory
-    # Print out progress whenever progress is a multiple of 20 so we can follow the
-    # (relatively slow) progress
-    if(progress%20==0):
-        print(progress)
-    if not bikes_split_urls[progress] == None:
-      try:
-        I = url_to_image(bikes_split_urls[progress])
-        if (len(I.shape))==3: #check if the image has width, length and channels
-          save_path = '/content/train/bikes/img'+str(progress)+'.jpg'#create a name of each image
-          cv2.imwrite(save_path,I)
-
-      except:
-        None
-'''        
-# pdb.set_trace()
-#Validation data:
-'''
-for progress in range(50):#store all the images on a directory
-    # Print out progress whenever progress is a multiple of 20 so we can follow the
-    # (relatively slow) progress
-    if(progress%2==0):
-        print(progress)
-    if not split_urls[progress] == None:
-      try:
-        I = url_to_image(split_urls[n_of_training_images+progress])#get images that are different from the ones used for training
-        if (len(I.shape))==3: #check if the image has width, length and channels
-          save_path = str(progress)+'_validation.jpg'#create a name of each image
-          cv2.imwrite(save_path,I)
-
-      except:
-        None
-
-#do the same for bikes:
-for progress in range(50):#store all the images on a directory
-    # Print out progress whenever progress is a multiple of 20 so we can follow the
-    # (relatively slow) progress
-    if(progress%20==0):
-        print(progress)
-    if not bikes_split_urls[progress] == None:
-      try:
-        I = url_to_image(bikes_split_urls[n_of_training_images+progress])#get images that are different from the ones used for training
-        if (len(I.shape))==3: #check if the image has width, length and channels
-          save_path = '/content/validation/bikes/img'+str(progress)+'.jpg'#create a name of each image
-          cv2.imwrite(save_path,I)
-
-      except:
-        None
-'''
+if(__name__=="__main__"):
+    main()

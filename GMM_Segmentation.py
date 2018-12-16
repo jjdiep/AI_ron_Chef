@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from skimage.segmentation import slic, mark_boundaries
 from skimage import color
 from skimage.measure import regionprops
-import eta.core.image as etai
+# import eta.core.image as etai
 from collections import deque
 import pdb
 from sklearn.cluster import KMeans
@@ -38,7 +38,7 @@ def clusterSIFTfeatures(img):
     X=getSIFTfeatures(img)
     lowest_bic=np.infty
     bic=[]
-    n_components_range=range(1,7)
+    n_components_range=range(1,4)
     cv_types=['spherical','tied','diag','full']
     for cv_type in cv_types:
         for n_components in n_components_range:
@@ -121,7 +121,7 @@ def GaussianSubImage(img,BoundingBoxCenter,BoundingBoxLength):
     for i in range(BoundingBoxLength.shape[0]):
         x,y=BoundingBoxCenter[i]
         length=BoundingBoxLength[i]
-        length=np.uint64(length*0.6)
+        length=np.uint64(length*0.7)
         x=np.uint64(x+crop)
         y=np.uint64(y+crop)
         top=np.uint64(y+length)
@@ -141,33 +141,50 @@ def GaussianSubImage(img,BoundingBoxCenter,BoundingBoxLength):
 
     return subimg
 
+def dir_maker():
+    # evidently Linux and Windows dependent but...
+    path = 'data/new_testimage/apple'
+    current_directory = os.getcwd()
+    final_directory = os.path.join(current_directory, path)
+
+    if not os.path.exists(final_directory):
+        try:
+            os.makedirs(final_directory)
+        except OSError:
+            print("Creation of the directory failed" % path)
+        else:
+            print("Successfully created the directory %s" % path)
+
+    return final_directory
 
 def main():
-    # LOAD IMAGE
-    #img = etai.read('porch1.png')[:,:,:3]
-    #img=cv2.imread('porch1.png')
-    #img=cv2.imread('Fridge.PNG')
-    img=cv2.imread('LotsofFood.PNG')
-    #img=cv2.imread('ManyFruits.PNG')
-    #img=cv2.imread('Banana.PNG')
-    #img=cv2.imread('breakfastburrito.PNG')
-    #img=cv2.imread('bruschetta.PNG')
-    #img=cv2.imread('lettuceEASY.PNG')
-    #img=cv2.imread('lettuceHARD.PNG')
-    #img=cv2.imread('lettuceMEDIUM.PNG')
-    #img=cv2.imread('tunatartar.PNG')
-    #img=cv2.imread('waffle.PNG')
-    #img=cv2.imread('JustinsVegggies.PNG')
-    #img=cv2.imread('JasonsFridge.JPG')
-    #img=cv2.imread('WadesFridge.JPG')
-    #img=cv2.imread('FelmansFridge.JPG')
-    #img=cv2.imread('DrewsFridge.JPG')
-    #img=cv2.imread('ChrissFridge.JPG')
-    #img=cv2.imread('IMG_0925.JPG')
-
+    '''
+    Once initial cluster image opens, close window and use keyboard commands to step through subimages.
+    '''
+    img=cv2.imread('testsample_1.png')
+    x_dim, y_dim, c_dim = img.shape
+    min_len = 1100
+    max_dim = max(x_dim,y_dim)
+    if max_dim < min_len:
+        max_dim = min_len
+    img = cv2.resize(img, (0,0), fx = min_len/max_dim, fy = min_len/max_dim)
     BoundingBoxCenter,BoundingBoxLength=clusterSIFTfeatures(img)
     sub=GaussianSubImage(img,BoundingBoxCenter,BoundingBoxLength)
+    dir_maker()
+    sub_min_len = 500
 
+    for i in range(len(sub)):
+        sub_x_dim, sub_y_dim, sub_c_dim = sub[i].shape
+        sub_max_dim = max(sub_x_dim, sub_y_dim)
+        delta_w = y_dim - sub_y_dim
+        delta_h = x_dim - sub_x_dim
+        top, bottom = delta_h//2, delta_h-(delta_h//2)
+        left, right = delta_w//2, delta_w-(delta_w//2)
+        color = [0, 0, 0]
+        # sub_img = cv2.resize(sub[i], (0,0), fx = 1, fy = 1)
+        sub_img = cv2.resize(sub[i], (0,0), fx = sub_min_len/sub_max_dim, fy = sub_min_len/sub_max_dim)
+        # sub_img = cv2.copyMakeBorder(sub[i], top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
+        cv2.imwrite('data/new_testimage/apple/subimage_'+str(i)+'.jpg',sub_img)
 
 
 if(__name__=="__main__"):
